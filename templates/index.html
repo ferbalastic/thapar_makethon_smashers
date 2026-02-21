@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Scholara</title>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+body { background:#F4F6FA; }
+
+.main-card {
+    background:white;
+    border-radius:20px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.05);
+}
+
+.label {
+    font-size:11px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:#94A3B8;
+    margin-bottom:6px;
+}
+
+.upload-box {
+    border:2px dashed #CBD5E1;
+    border-radius:16px;
+    padding:40px;
+    text-align:center;
+    transition:0.2s ease;
+    cursor:pointer;
+}
+
+.upload-box:hover {
+    border-color:#4F46E5;
+    background:#F8FAFC;
+}
+
+.hidden { display:none; }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6">
+
+<div class="max-w-3xl w-full main-card p-10">
+
+<!-- HEADER -->
+<div class="flex items-center space-x-3 mb-10">
+    <div class="bg-indigo-600 text-white w-12 h-12 rounded-xl flex items-center justify-center shadow">
+        🎓
+    </div>
+    <div>
+        <h1 class="text-2xl font-semibold text-gray-800">Scholara</h1>
+        <p class="text-xs tracking-widest text-gray-400">AI SCHOLARSHIP INTELLIGENCE</p>
+    </div>
+</div>
+
+<!-- STUDENT DETAILS -->
+<h2 class="text-lg font-semibold text-gray-800 mb-6">Student Details</h2>
+
+<div class="grid grid-cols-2 gap-6 mb-8">
+
+    <div>
+        <div class="label">Full Name</div>
+        <input id="name" type="text"
+            class="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500">
+    </div>
+
+    <div>
+        <div class="label">GPA</div>
+        <input id="gpa" type="number" step="0.01"
+            class="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500">
+    </div>
+
+    <div>
+        <div class="label">Major</div>
+        <input id="major" type="text"
+            class="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500">
+    </div>
+
+    <div>
+        <div class="label">Country</div>
+        <input id="country" type="text"
+            class="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500">
+    </div>
+
+</div>
+
+<!-- SELECT INSTITUTE -->
+<h2 class="text-lg font-semibold text-gray-800 mb-6">Select Institute</h2>
+
+<div class="mb-6">
+    <select id="instituteSelect"
+        onchange="checkInstitute()"
+        class="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500">
+
+        <option value="">-- Select University --</option>
+        <option value="stanford">Stanford University</option>
+        <option value="mit">MIT</option>
+        <option value="harvard">Harvard University</option>
+        <option value="other">Other (Upload Requirements)</option>
+    </select>
+</div>
+
+<!-- UPLOAD SECTION -->
+<div id="uploadSection" class="hidden mb-8">
+
+    <h2 class="text-lg font-semibold text-gray-800 mb-4">
+        Insert Document
+    </h2>
+
+    <div id="dropZone"
+        class="upload-box relative">
+
+        <div class="flex flex-col items-center space-y-3 text-gray-500">
+            <div class="text-4xl">📄</div>
+            <p class="font-medium">Drop PDF here</p>
+            <p class="text-sm">or click to browse</p>
+        </div>
+
+        <input id="fileInput" type="file" accept=".pdf"
+            class="absolute inset-0 opacity-0 cursor-pointer">
+    </div>
+
+    <p id="fileName" class="mt-4 text-sm text-gray-600"></p>
+    <p id="uploadStatus" class="mt-2 text-sm font-medium"></p>
+
+</div>
+<!-- ANALYZE BUTTON -->
+<button onclick="analyze()"
+    class="w-full bg-indigo-600 text-white py-4 rounded-2xl text-lg font-medium hover:bg-indigo-700 transition">
+    Analyze Eligibility
+</button>
+
+<!-- RESULT SECTION -->
+<div id="resultSection" class="hidden mt-10">
+
+    <div class="bg-indigo-50 border border-indigo-200 p-6 rounded-xl">
+
+        <h3 id="resultTitle" class="text-lg font-semibold text-indigo-700 mb-2">
+            Result
+        </h3>
+
+        <p id="resultText" class="text-gray-700">
+            Eligibility result will appear here.
+        </p>
+
+    </div>
+
+</div>
+
+</div>
+
+<script>
+function checkInstitute() {
+    const value = document.getElementById("instituteSelect").value;
+    const uploadSection = document.getElementById("uploadSection");
+
+    if (value === "other") {
+        uploadSection.classList.remove("hidden");
+    } else {
+        uploadSection.classList.add("hidden");
+    }
+}
+
+function analyze() {
+
+    document.getElementById("resultSection").classList.remove("hidden");
+
+    document.getElementById("resultTitle").innerText = "Eligible ✅";
+    document.getElementById("resultText").innerText =
+        "Based on the provided details, you meet the primary eligibility requirements. Confidence score: 89%";
+}
+</script>
+
+</body>
+</html>
