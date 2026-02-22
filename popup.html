@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { width: 320px; font-family: 'Segoe UI', Tahoma, sans-serif; padding: 15px; color: #333; }
+        h2 { margin-top: 0; color: #2c3e50; font-size: 18px; border-bottom: 2px solid #eee; padding-bottom: 5px;}
+        button { width: 100%; padding: 10px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px;}
+        button:hover { background: #1d4ed8; }
+        #result-box { margin-top: 15px; padding: 10px; border-radius: 6px; background: #f8fafc; display: none; border: 1px solid #e2e8f0;}
+        .status { font-weight: bold; margin-bottom: 5px; }
+        .ELIGIBLE { color: #16a34a; }
+        .NOT_ELIGIBLE { color: #dc2626; }
+        .NEED_MORE_INFO { color: #d97706; }
+        .loader { display: none; text-align: center; margin-top: 10px; font-style: italic; color: #666; }
+    </style>
+</head>
+<body>
+    <h2>🎓 Scholara AI</h2>
+    <p style="font-size: 13px; color: #555;">Navigate to a university admissions page and click analyze to check your eligibility.</p>
+    
+    <button id="analyze-btn">Analyze This Page</button>
+    <div id="loading" class="loader">Scholara is reading the page...</div>
+    
+    <div id="result-box">
+        <div id="status-text" class="status"></div>
+        <div id="reason-text" style="font-size: 13px;"></div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
