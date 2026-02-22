@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scholarship Requirement Analyzer</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+body { background:#F4F6FA; }
+
+.card {
+    background:white;
+    border-radius:20px;
+    box-shadow:0 8px 30px rgba(0,0,0,0.05);
+}
+
+.upload-box {
+    border:2px dashed #CBD5E1;
+    border-radius:20px;
+    padding:60px;
+    text-align:center;
+    transition:0.25s ease;
+    cursor:pointer;
+    background:white;
+}
+
+.upload-box.dragover {
+    border-color:#4F46E5;
+    background:#EEF2FF;
+}
+
+.fade-in {
+    animation:fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {opacity:0; transform:translateY(10px);}
+    to {opacity:1; transform:translateY(0);}
+}
+</style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-6">
+
+<div class="max-w-3xl w-full card p-10">
+
+<!-- HEADER -->
+<div class="flex items-center space-x-3 mb-10">
+    <div class="bg-indigo-600 text-white w-12 h-12 rounded-xl flex items-center justify-center shadow">
+        📄
+    </div>
+    <div>
+        <h1 class="text-2xl font-semibold text-gray-800">
+            Scholarship Requirement Analyzer
+        </h1>
+        <p class="text-sm text-gray-500">
+            Upload a scholarship PDF to extract its main requirements.
+        </p>
+    </div>
+</div>
+
+<!-- UPLOAD AREA -->
+<div id="dropZone" class="upload-box relative mb-6">
+    <div class="flex flex-col items-center space-y-4 text-gray-500">
+        <div class="text-5xl">⬆️</div>
+        <p class="text-lg font-medium">Drop your PDF here</p>
+        <p class="text-sm">or click to browse</p>
+    </div>
+    <input id="fileInput"
+           type="file"
+           accept=".pdf"
+           class="absolute inset-0 opacity-0 cursor-pointer">
+</div>
+
+<!-- FILE PREVIEW -->
+<div id="filePreview" class="hidden flex flex-col items-center space-y-3 mb-6">
+
+    <img src="{{ url_for('static', filename='pdf-icon.png') }}"
+         class="w-24 h-24 object-contain">
+
+    <p id="fileName"
+       class="text-sm font-medium text-gray-700 text-center"></p>
+
+    <button onclick="resetFile()"
+        class="text-indigo-600 text-sm hover:underline">
+        Change File
+    </button>
+
+</div>
+<!-- SUBMIT BUTTON -->
+<button id="submitBtn"
+    class="w-full bg-indigo-600 text-white py-4 rounded-2xl text-lg font-medium hover:bg-indigo-700 transition mb-6">
+    Submit & Analyze
+</button>
+
+<p id="statusMessage" class="text-sm font-medium mb-6"></p>
+
+<!-- RESULTS -->
+<div id="resultSection" class="hidden fade-in">
+    <h2 class="text-xl font-semibold text-gray-800 mb-4">
+        Main Requirements
+    </h2>
+
+    <div id="resultContent"
+         class="bg-indigo-50 border border-indigo-200 rounded-xl p-6 text-gray-700 whitespace-pre-line">
+        Extracted requirements will appear here.
+    </div>
+</div>
+
+</div>
+
+<script>
+const dropZone = document.getElementById("dropZone");
+const fileInput = document.getElementById("fileInput");
+const fileName = document.getElementById("fileName");
+const submitBtn = document.getElementById("submitBtn");
+const statusMessage = document.getElementById("statusMessage");
+const resultSection = document.getElementById("resultSection");
+const resultContent = document.getElementById("resultContent");
+
+dropZone.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    dropZone.classList.add("dragover");
+});
+
+dropZone.addEventListener("dragleave", () => {
+    dropZone.classList.remove("dragover");
+});
+
+dropZone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropZone.classList.remove("dragover");
+    fileInput.files = e.dataTransfer.files;
+    showFilePreview();
+});
+
+fileInput.addEventListener("change", () => {
+    showFilePreview();
+});
+
+function showFilePreview() {
+    const file = fileInput.files[0];
+    if (file) {
+        document.getElementById("dropZone").classList.add("hidden");
+        document.getElementById("filePreview").classList.remove("hidden");
+        document.getElementById("fileName").innerText = file.name;
+    }
+}
+
+function resetFile() {
+    fileInput.value = "";
+    document.getElementById("dropZone").classList.remove("hidden");
+    document.getElementById("filePreview").classList.add("hidden");
+}
+
+submitBtn.addEventListener("click", async () => {
+
+    const file = fileInput.files[0];
+    if (!file) {
+        statusMessage.innerText = "Please select a PDF first.";
+        statusMessage.className = "text-sm font-medium text-red-500";
+        return;
+    }
+
+    statusMessage.innerText = "Analyzing document...";
+    statusMessage.className = "text-sm font-medium text-indigo-600";
+
+    const formData = new FormData();
+    formData.append("pdf", file);
+
+    try {
+        const response = await fetch("/summarize", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await response.json();
+
+        resultSection.classList.remove("hidden");
+        console.log(data)
+        resultContent.innerText = data.summary || "No requirements extracted.";
+
+        statusMessage.innerText = "Analysis complete ✅";
+        statusMessage.className = "text-sm font-medium text-green-600";
+
+    } catch (error) {
+        statusMessage.innerText = "Error processing file.";
+        statusMessage.className = "text-sm font-medium text-red-500";
+    }
+});
+</script>
+
+</body>
+</html>

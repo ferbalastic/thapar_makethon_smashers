@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<link rel="icon" type="image/png" href="{{ url_for('static', filename='favico.png') }}">
+<meta charset="UTF-8">
+<title>Scholara</title>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+body { background:#F4F6FA; }
+
+.main-card {
+    background:white;
+    border-radius:20px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.05);
+}
+
+.label {
+    font-size:11px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:#94A3B8;
+    margin-bottom:6px;
+}
+
+.upload-box {
+    border:2px dashed #CBD5E1;
+    border-radius:16px;
+    padding:40px;
+    text-align:center;
+    transition:0.2s ease;
+    cursor:pointer;
+}
+
+.upload-box:hover {
+    border-color:#4F46E5;
+    background:#F8FAFC;
+}
+
+.hidden { display:none; }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6">
+
+<div class="max-w-3xl w-full main-card p-10">
+
+<!-- HEADER -->
+<div class="flex items-center space-x-3 mb-10">
+    <div class="bg-indigo-600 text-white w-12 h-12 rounded-xl flex items-center justify-center shadow">
+        🎓
+    </div>
+    <div>
+        <h1 class="text-2xl font-semibold text-gray-800">Scholara</h1>
+        <p class="text-xs tracking-widest text-gray-400">AI SCHOLARSHIP INTELLIGENCE</p>
+    </div>
+</div>
+
+<!-- MODE SWITCHER -->
+<div class="flex justify-center mb-8">
+    <div class="bg-gray-200 p-1 rounded-xl flex space-x-1">
+        <button id="manualBtn"
+            onclick="switchMode('manual')"
+            class="px-6 py-2 rounded-lg font-medium bg-white shadow text-indigo-600">
+            Enter Details
+        </button>
+        <button id="cvBtn"
+            onclick="switchMode('cv')"
+            class="px-6 py-2 rounded-lg font-medium text-gray-500">
+            Upload CV
+        </button>
+    </div>
+</div>
+
+
+<div id="manualSection">
+    
+
+<!-- STUDENT DETAILS -->
+<h2 class="text-lg font-semibold text-gray-800 mb-6">Student Details</h2>
+
+<div class="grid grid-cols-2 gap-6 mb-8">
+
+    <div>
+        <div class="label">Full Name</div>
+        <input id="name" type="text"
+            class="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500">
+    </div>
+
+    <div>
+        <div class="label">GPA</div>
+        <input id="gpa" type="number" step="0.01"
+            class="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500">
+    </div>
+
+    <div>
+        <div class="label">Major</div>
+        <input id="major" type="text"
+            class="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500">
+    </div>
+
+    <div>
+        <div class="label">Country</div>
+        <input id="country" type="text"
+            class="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500">
+    </div>
+
+</div>
+
+<!-- SELECT INSTITUTE -->
+<h2 class="text-lg font-semibold text-gray-800 mb-6">Select Institute</h2>
+
+<div class="mb-6">
+    <select id="instituteSelect"
+        onchange="checkInstitute()"
+        class="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500">
+
+        <option value="">-- Select University --</option>
+        <option value="stanford">Stanford University</option>
+        <option value="mit">MIT</option>
+        <option value="harvard">Harvard University</option>
+        <option value="other">Other (Upload Requirements)</option>
+    </select>
+</div>
+</div>
+
+<!-- CV UPLOAD SECTION -->
+
+<div id="cvSection" class="hidden mb-8">
+
+    <h2 class="text-lg font-semibold text-gray-800 mb-4">
+        Upload Your CV (PDF)
+    </h2>
+
+    <!-- Upload Box -->
+    <div id="cvUploadBox" class="upload-box relative mb-4">
+        <div class="flex flex-col items-center space-y-3 text-gray-500">
+            <div class="text-5xl">⬆️</div>
+            <p class="font-medium">Drop CV here</p>
+            <p class="text-sm">or click to browse</p>
+        </div>
+
+        <input id="cvFileInput" type="file" accept=".pdf"
+            class="absolute inset-0 opacity-0 cursor-pointer">
+    </div>
+
+    <!-- Uploaded File Preview -->
+    <div id="cvPreview" class="hidden flex flex-col items-center space-y-3">
+        <img src="{{ url_for('static', filename='pdf-icon.png') }}"
+             class="w-24 h-24 object-contain">
+
+        <p id="cvFileName"
+           class="text-sm font-medium text-gray-700 text-center"></p>
+    </div>
+
+</div>
+<!-- UPLOAD SECTION -->
+<div id="uploadSection" class="hidden mb-8">
+
+    <h2 class="text-lg font-semibold text-gray-800 mb-4">
+        Insert Document
+    </h2>
+
+    <div id="dropZone"
+        class="upload-box relative">
+
+        <div class="flex flex-col items-center space-y-3 text-gray-500">
+            <div class="text-4xl">📄</div>
+            <p class="font-medium">Drop PDF here</p>
+            <p class="text-sm">or click to browse</p>
+        </div>
+
+        <input id="fileInput" type="file" accept=".pdf"
+            class="absolute inset-0 opacity-0 cursor-pointer">
+    </div>
+
+    <p id="fileName" class="mt-4 text-sm text-gray-600"></p>
+    <p id="uploadStatus" class="mt-2 text-sm font-medium"></p>
+
+</div>
+<!-- ANALYZE BUTTON -->
+<button onclick="analyze()"
+    class="w-full bg-indigo-600 text-white py-4 rounded-2xl text-lg font-medium hover:bg-indigo-700 transition">
+    Analyze Eligibility
+</button>
+
+<!-- RESULT SECTION -->
+<div id="resultSection" class="hidden mt-10">
+
+    <div class="bg-indigo-50 border border-indigo-200 p-6 rounded-xl">
+
+        <h3 id="resultTitle" class="text-lg font-semibold text-indigo-700 mb-2">
+            Result
+        </h3>
+
+        <p id="resultText" class="text-gray-700">
+            Eligibility result will appear here.
+        </p>
+
+    </div>
+
+</div>
+
+<!-- CHAT BUTTON (Hidden Initially) -->
+<div id="chatRedirectContainer" class="hidden mt-6 text-center">
+    <button
+        onclick="goToChat()"
+        class="bg-indigo-600 text-white px-6 py-3 rounded-xl hover:bg-indigo-700 transition">
+        Continue to Chat with AI →
+    </button>
+</div>
+
+</div>
+
+<script>
+   document.getElementById("cvFileInput").addEventListener("change", function() {
+    const file = this.files[0];
+    if (file) {
+
+        // Hide upload box
+        document.getElementById("cvUploadBox").classList.add("hidden");
+
+        // Show preview
+        document.getElementById("cvPreview").classList.remove("hidden");
+
+        // Show file name
+        document.getElementById("cvFileName").innerText = file.name;
+    }
+});
+function checkInstitute() {
+    const value = document.getElementById("instituteSelect").value;
+    const uploadSection = document.getElementById("uploadSection");
+
+    if (value === "other") {
+        uploadSection.classList.remove("hidden");
+    } else {
+        uploadSection.classList.add("hidden");
+    }
+}
+
+async function analyze() {
+
+    const manualSection = document.getElementById("manualSection");
+    const isManual = !manualSection.classList.contains("hidden");
+
+    document.getElementById("resultSection").classList.remove("hidden");
+    document.getElementById("resultTitle").innerText = "Analyzing...";
+    document.getElementById("resultText").innerText = "Please wait...";
+
+    try {
+
+        if (isManual) {
+
+            const userData = {
+                name: document.getElementById("name").value,
+                gpa: document.getElementById("gpa").value,
+                major: document.getElementById("major").value,
+                country: document.getElementById("country").value,
+                institute: document.getElementById("instituteSelect").value
+            };
+
+            const response = await fetch("/ask", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(userData)
+            });
+
+            const data = await response.json();
+            document.getElementById("resultText").innerText = data.result;
+
+        } else {
+
+            const file = document.getElementById("cvFileInput").files[0];
+
+            if (!file) {
+                document.getElementById("resultText").innerText = "Please upload a CV.";
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("cv", file);
+
+            const response = await fetch("/upload_cv", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+            document.getElementById("resultText").innerText = data.result;
+
+        }
+
+        document.getElementById("resultTitle").innerText = "Result";
+        document.getElementById("chatRedirectContainer").classList.remove("hidden");
+
+    } catch (error) {
+        document.getElementById("resultTitle").innerText = "Error";
+        document.getElementById("resultText").innerText = "Something went wrong.";
+    }
+}
+
+async function goToChat() {
+
+    const name = document.getElementById("name").value;
+    const gpa = document.getElementById("gpa").value;
+    const major = document.getElementById("major").value;
+    const country = document.getElementById("country").value;
+    const institute = document.getElementById("instituteSelect").value;
+
+    const userData = {
+        name: name,
+        gpa: gpa,
+        major: major,
+        country: country,
+        institute: institute
+    };
+
+    try {
+        const response = await fetch("/chatting", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(userData)
+        });
+
+        const data = await response.json();
+
+        if (data.redirect) {
+            window.location.href = data.redirect;
+        }
+
+    } catch (error) {
+        console.error("Error sending data to chat:", error);
+    }
+}
+
+function switchMode(mode) {
+
+    const manualSection = document.getElementById("manualSection");
+    const cvSection = document.getElementById("cvSection");
+
+    const manualBtn = document.getElementById("manualBtn");
+    const cvBtn = document.getElementById("cvBtn");
+
+    if (mode === "manual") {
+        manualSection.classList.remove("hidden");
+        cvSection.classList.add("hidden");
+
+        manualBtn.classList.add("bg-white","shadow","text-indigo-600");
+        cvBtn.classList.remove("bg-white","shadow","text-indigo-600");
+        cvBtn.classList.add("text-gray-500");
+
+    } else {
+        manualSection.classList.add("hidden");
+        cvSection.classList.remove("hidden");
+
+        cvBtn.classList.add("bg-white","shadow","text-indigo-600");
+        manualBtn.classList.remove("bg-white","shadow","text-indigo-600");
+        manualBtn.classList.add("text-gray-500");
+    }
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Scholara AI Chat</title>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+body { background:#F4F6FA; }
+
+.chat-card {
+    background:white;
+    border-radius:20px;
+    box-shadow:0 8px 30px rgba(0,0,0,0.05);
+}
+
+.chat-container {
+    height:500px;
+    overflow-y:auto;
+}
+
+.user-msg {
+    background:#4F46E5;
+    color:white;
+    padding:12px 16px;
+    border-radius:16px 16px 4px 16px;
+    max-width:75%;
+}
+
+.ai-msg {
+    background:#E5E7EB;
+    color:#111827;
+    padding:12px 16px;
+    border-radius:16px 16px 16px 4px;
+    max-width:75%;
+}
+
+.fade-in {
+    animation:fadeIn 0.25s ease-in;
+}
+
+@keyframes fadeIn {
+    from {opacity:0; transform:translateY(5px);}
+    to {opacity:1; transform:translateY(0);}
+}
+</style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-6">
+
+<div class="w-full max-w-4xl chat-card p-8 flex flex-col">
+
+<!-- HEADER -->
+<div class="flex items-center space-x-3 mb-6">
+    <div class="bg-indigo-600 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow">
+        🤖
+    </div>
+    <div>
+        <h1 class="text-xl font-semibold text-gray-800">
+            Scholara AI Chat
+        </h1>
+        <p class="text-xs text-gray-500">
+            Ask questions about scholarship eligibility.
+        </p>
+    </div>
+</div>
+
+<!-- CHAT AREA -->
+<div id="chatBox" class="chat-container flex flex-col space-y-4 mb-6 p-4 bg-gray-50 rounded-xl">
+</div>
+
+<!-- INPUT AREA -->
+<div class="flex space-x-3">
+
+    <input id="userInput"
+           type="text"
+           placeholder="Ask something..."
+           class="flex-1 border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500">
+
+    <button id="sendBtn"
+            class="bg-indigo-600 text-white px-6 rounded-xl hover:bg-indigo-700 transition">
+        Send
+    </button>
+
+    <button id="stopBtn"
+            class="bg-red-500 text-white px-6 rounded-xl hover:bg-red-600 transition">
+        Stop
+    </button>
+
+</div>
+
+</div>
+
+<script>
+const chatBox = document.getElementById("chatBox");
+const sendBtn = document.getElementById("sendBtn");
+const stopBtn = document.getElementById("stopBtn");
+const userInput = document.getElementById("userInput");
+
+let chatActive = true;
+
+function addMessage(content, sender) {
+    const msgDiv = document.createElement("div");
+    msgDiv.classList.add("fade-in");
+
+    if (sender === "user") {
+        msgDiv.classList.add("flex", "justify-end");
+        msgDiv.innerHTML = `<div class="user-msg">${content}</div>`;
+    } else {
+        msgDiv.classList.add("flex", "justify-start");
+        msgDiv.innerHTML = `<div class="ai-msg">${content}</div>`;
+    }
+
+    chatBox.appendChild(msgDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+sendBtn.addEventListener("click", async () => {
+    if (!chatActive) return;
+
+    const message = userInput.value.trim();
+    if (!message) return;
+
+    addMessage(message, "user");
+    userInput.value = "";
+
+    addMessage("Thinking...", "ai");
+
+    try {
+        const response = await fetch("/chat", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ message: message })
+        });
+
+        const data = await response.json();
+
+        // Remove "Thinking..."
+        chatBox.removeChild(chatBox.lastChild);
+
+        addMessage(data.reply, "ai");
+
+    } catch (error) {
+        chatBox.removeChild(chatBox.lastChild);
+        addMessage("Error contacting server.", "ai");
+    }
+});
+
+stopBtn.addEventListener("click", () => {
+    chatActive = false;
+    addMessage("Chat stopped.", "ai");
+    sendBtn.disabled = true;
+});
+</script>
+
+</body>
+</html>
